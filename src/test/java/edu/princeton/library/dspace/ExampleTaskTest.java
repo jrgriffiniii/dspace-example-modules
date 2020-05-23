@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import org.dspace.core.Context;
 import org.dspace.core.I18nUtil;
 import org.dspace.eperson.EPerson;
+import org.dspace.eperson.Group;
 
 import org.junit.runner.RunWith;
 import org.junit.Test;
@@ -12,9 +13,16 @@ import org.junit.Before;
 import org.junit.After;
 import static org.junit.Assert.*;
 
-//import org.powermock.core.classloader.annotations.PrepareForTest;
-//import org.powermock.modules.junit4.PowerMockRunner;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(EPerson.class)
 public class ExampleTaskTest {
   private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
   private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
@@ -28,7 +36,10 @@ public class ExampleTaskTest {
   }
 
   @Before
-  public void setUpMocks() throws Exception {}
+  public void setUpMocks() throws Exception {
+
+    mockStatic(EPerson.class);
+  }
 
   @After
   public void restoreStreams() {
@@ -40,7 +51,9 @@ public class ExampleTaskTest {
   public void testRun() throws Exception {
     final Context context = new Context();
     context.turnOffAuthorisationSystem();
-    /*
+
+/*
+    Group.initDefaultGroupNames(context);
 
     final EPerson eperson = EPerson.create(context);
     eperson.setFirstName("first");
@@ -53,8 +66,9 @@ public class ExampleTaskTest {
 
     // Set our global test EPerson as the current user in DSpace
     context.setCurrentUser(eperson);
+*/
+    when(EPerson.findByEmail( any(Context.class), anyString() )).thenReturn(null);
 
-    */
     context.restoreAuthSystemState();
     context.commit();
 
