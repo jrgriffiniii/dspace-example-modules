@@ -46,8 +46,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 @PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(EPerson.class)
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest(EPerson.class)
 public class ExampleTaskTest {
   private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
   private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
@@ -86,7 +86,7 @@ public class ExampleTaskTest {
       // Applies/initializes our mock database by invoking its constructor
       // (NOTE: This also initializes the DatabaseManager, which in turn
       // calls DatabaseUtils to initialize the entire DB via Flyway)
-      new MockDatabaseManager();
+      //new MockDatabaseManager();
 
       // Initialize mock indexer (which does nothing, since Solr isn't running)
       new MockIndexEventConsumer();
@@ -110,7 +110,7 @@ public class ExampleTaskTest {
   @Before
   public void setUpMocks() throws Exception {
 
-    mockStatic(EPerson.class);
+    //mockStatic(EPerson.class);
   }
 
   @After
@@ -124,21 +124,26 @@ public class ExampleTaskTest {
     final Context context = new Context();
     context.turnOffAuthorisationSystem();
 
-    Group.initDefaultGroupNames(context);
+    EPerson eperson = null;
+    eperson = EPerson.findByEmail(context, "test@email.com");
+    if(eperson == null)
+    {
 
-    final EPerson eperson = EPerson.create(context);
-    eperson.setFirstName("first");
-    eperson.setLastName("last");
-    eperson.setEmail("test@email.com");
-    eperson.setCanLogIn(true);
-    eperson.setLanguage(I18nUtil.getDefaultLocale().getLanguage());
-    // actually save the eperson to unit testing DB
-    eperson.update();
+      eperson = EPerson.create(context);
+      eperson.setFirstName("first");
+      eperson.setLastName("last");
+      eperson.setEmail("test@email.com");
+      eperson.setCanLogIn(true);
+      eperson.setLanguage(I18nUtil.getDefaultLocale().getLanguage());
+      // actually save the eperson to unit testing DB
+      eperson.update();
+    }
 
     // Set our global test EPerson as the current user in DSpace
     context.setCurrentUser(eperson);
+    //Group.initDefaultGroupNames(context);
 
-    when(EPerson.findByEmail( any(Context.class), anyString() )).thenReturn(null);
+    //when(EPerson.findByEmail( any(Context.class), anyString() )).thenReturn(null);
 
     context.restoreAuthSystemState();
     context.commit();
@@ -158,4 +163,36 @@ public class ExampleTaskTest {
       final String exceptionMessage = exception.getMessage();
     }
   }
+
+protected void cleanupContext(Context c)
+    {
+        // If context still valid, abort it
+        if(c!=null && c.isValid())
+           c.abort();
+
+        // Cleanup Context object by setting it to null
+        if(c!=null)
+           c = null;
+    }
+
+@After
+    public void destroy()
+    {
+        // Cleanup our global context object
+        cleanupContext(context);
+    }
+
+    @AfterClass
+    public static void destroyOnce()
+    {
+        //we clear the properties
+        testProps.clear();
+        testProps = null;
+        
+        //Also clear out the kernel & nullify (so JUnit will clean it up)
+        if (kernelImpl!=null)
+            kernelImpl.destroy();
+        kernelImpl = null;
+    }
+
 }
