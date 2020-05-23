@@ -18,7 +18,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
+
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -43,6 +45,7 @@ import org.dspace.storage.rdbms.MockDatabaseManager;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+@PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(EPerson.class)
 public class ExampleTaskTest {
