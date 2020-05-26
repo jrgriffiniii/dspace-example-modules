@@ -6,18 +6,28 @@
     edu.princeton.library.dspace
   </groupId>
   <artifactId>
-    dspace-example-module
+    dspace-example-modules
   </artifactId>
   <name>
-    DSpace Example Module
+    DSpace Example Modules
   </name>
   <version>
     5.3
   </version>
   <description>
-    An example module for DSpace.
+    Example modules for DSpace.
   </description>
+
+  <!-- This is necessary for building within DSpace 5.3 installations -->
+  <parent>
+    <artifactId>dspace-parent</artifactId>
+    <groupId>org.dspace</groupId>
+    <version>5.3</version>
+    <relativePath>..</relativePath>
+  </parent>
+
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- This is the path to the root [dspace-src] directory. -->
     <root.basedir>
       ${basedir}/..
@@ -173,6 +183,24 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>
+          fr.jcgay.maven.plugins
+        </groupId>
+        <artifactId>
+          buildplan-maven-plugin
+        </artifactId>
+        <version>
+          1.3
+        </version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.2.3</version>
       </plugin>
     </plugins>
   </build>

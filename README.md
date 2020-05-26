@@ -18,6 +18,12 @@ mvn process-test-resources
 
 ## Development
 
+### Listing the Maven build phases
+
+```
+mvn buildplan:list
+```
+
 ### Running an integration test:
 ```
 mvn test -Dmaven.test.skip=false -Dtest=ExampleTaskIntegrationTest
@@ -44,3 +50,16 @@ jdb -attach 5005
 ```
 
 Documentation for the jdb can be found on [the Oracle Java 8 documentation](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/jdb.html). There is also support for this in [Vim](https://gitlab.com/Dica-Developer/vim-jdb), [Sublime](https://github.com/jdebug/JDebug), [Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug), and [IntelliJ IDEA](https://www.jetbrains.com/help/idea/debugging-your-first-java-application.html).
+
+### Building the WAR:
+
+```
+mvn war:war
+```
+
+### Deploying the WAR:
+
+```
+mvn war:exploded
+ant -Dconfig=/dspace/config/dspace.cfg fresh_install
+```
