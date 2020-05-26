@@ -2,6 +2,11 @@ package edu.princeton.library.dspace;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.IOException;
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.Properties;
+import java.util.TimeZone;
 
 import org.dspace.core.Context;
 import org.dspace.core.I18nUtil;
@@ -16,6 +21,7 @@ import static org.junit.Assert.*;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -23,12 +29,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
-
-import java.io.IOException;
-import java.net.URL;
-import java.sql.SQLException;
-import java.util.Properties;
-import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 import org.dspace.app.util.MockUtil;
@@ -46,9 +46,9 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 @PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest(EPerson.class)
-public class ExampleTaskTest {
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(EPerson.class)
+public class ExampleTaskUnitTest {
   private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
   private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
   private final PrintStream originalOut = System.out;
@@ -109,8 +109,7 @@ public class ExampleTaskTest {
 
   @Before
   public void setUpMocks() throws Exception {
-
-    //mockStatic(EPerson.class);
+    mockStatic(EPerson.class);
   }
 
   @After
@@ -121,10 +120,15 @@ public class ExampleTaskTest {
 
   @Test
   public void testRun() throws Exception {
+    /*
     final Context context = new Context();
     context.turnOffAuthorisationSystem();
+    */
 
-    EPerson eperson = null;
+    EPerson mockEPerson = mock(EPerson.class);
+    when(EPerson.findByEmail( any(Context.class), anyString() )).thenReturn(mockEPerson);
+
+    /*
     eperson = EPerson.findByEmail(context, "test@email.com");
     if(eperson == null)
     {
@@ -139,6 +143,7 @@ public class ExampleTaskTest {
       eperson.update();
     }
 
+
     // Set our global test EPerson as the current user in DSpace
     context.setCurrentUser(eperson);
     //Group.initDefaultGroupNames(context);
@@ -147,6 +152,7 @@ public class ExampleTaskTest {
 
     context.restoreAuthSystemState();
     context.commit();
+    */
 
     final String[] taskArgs = new String[] {"-euser@localhost.localdomain"};
     ExampleTask.main(taskArgs);
