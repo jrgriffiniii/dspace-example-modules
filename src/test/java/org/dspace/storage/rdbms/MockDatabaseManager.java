@@ -26,7 +26,7 @@ import org.dspace.core.Context;
  * modifies some methods of DatabaseManager which are currently problematic in H2.
  *
  * <p>Any methods which are NOT "mocked" below are just used as-is from the original DatabaseManager
- * class. Also note that, in order to support running Unit Tests on PostgreSQL & Oracle, any
+ * class. Also note that, in order to support running Unit Tests on PostgreSQL &amp; Oracle, any
  * H2-specific logic is only executed after verifying your Unit Testing database reports that it is
  * indeed H2.
  *
@@ -44,9 +44,10 @@ public final class MockDatabaseManager extends MockUp<DatabaseManager> {
    *
    * <p>Set the constraint check to deferred (commit time)
    *
+   * @param inv the method call for the mocked DatabaseManager object
    * @param context The context object
    * @param constraintName the constraint name to deferred
-   * @throws SQLException
+   * @throws SQLException if an error occurs during the transaction
    */
   @Mock
   public static void setConstraintDeferred(Invocation inv, Context context, String constraintName)
@@ -88,9 +89,10 @@ public final class MockDatabaseManager extends MockUp<DatabaseManager> {
    *
    * <p>Set the constraint check to immediate (every query)
    *
+   * @param inv the method call for the mocked DatabaseManager object
    * @param context The context object
    * @param constraintName the constraint name to check immediately after every query
-   * @throws SQLException
+   * @throws SQLException if an error occurs during the transaction
    */
   @Mock
   public static void setConstraintImmediate(Invocation inv, Context context, String constraintName)

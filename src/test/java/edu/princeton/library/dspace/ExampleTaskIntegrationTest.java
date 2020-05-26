@@ -77,7 +77,11 @@ public class ExampleTaskIntegrationTest {
     System.setErr(new PrintStream(errContent));
   }
 
-  /** This is used to delete the DSpace kernel context after each test */
+  /**
+   * This is used to delete the DSpace kernel context after each test
+   *
+   * @param c the DSpace kernel context
+   */
   protected void cleanupContext(Context c) {
     // If context still valid, abort it
     if (c != null && c.isValid()) c.abort();
