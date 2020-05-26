@@ -24,6 +24,12 @@ mvn process-test-resources
 mvn buildplan:list
 ```
 
+### Ensuring that Classes comply with the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
+
+```
+mvn com.coveo:fmt-maven-plugin:format
+```
+
 ### Running an integration test:
 ```
 mvn test -Dmaven.test.skip=false -Dtest=ExampleTaskIntegrationTest

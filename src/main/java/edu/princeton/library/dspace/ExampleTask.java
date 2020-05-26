@@ -4,7 +4,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-
 import org.dspace.core.Context;
 import org.dspace.eperson.EPerson;
 
@@ -25,8 +24,7 @@ public final class ExampleTask {
 
       EPerson eperson = null;
       eperson = EPerson.findByEmail(context, email);
-      if(eperson == null)
-      {
+      if (eperson == null) {
         System.err.println(
             "Failed to find the user " + email + " - is this a valid e-mail address?");
       } else {
