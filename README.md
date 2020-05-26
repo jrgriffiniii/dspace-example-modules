@@ -1,6 +1,6 @@
-# An Modules for DSpace
+# Example Modules for DSpace
 
-This is an example module for DSpace 5.3, targeting Java 8 releases.
+This are example modules for DSpace 5.3 releases, targeting Java 8.
 
 ## Getting started
 
