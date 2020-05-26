@@ -8,24 +8,26 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import static org.junit.Assert.*;
-import org.junit.runner.RunWith;
-import org.junit.Test;
-import org.junit.Before;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.apache.log4j.Logger;
 
@@ -90,6 +92,7 @@ public class ExampleTaskUnitTest {
       fail("Failed to raise an exception");
     } catch (IllegalArgumentException exception) {
       final String exceptionMessage = exception.getMessage();
+      assertEquals("Missing the email argument", exceptionMessage);
     }
   }
 

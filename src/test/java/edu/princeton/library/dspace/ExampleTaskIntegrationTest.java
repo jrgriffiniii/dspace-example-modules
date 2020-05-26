@@ -2,60 +2,48 @@ package edu.princeton.library.dspace;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
-import org.dspace.core.Context;
-import org.dspace.core.I18nUtil;
-import org.dspace.eperson.EPerson;
-import org.dspace.eperson.Group;
-
-import org.junit.runner.RunWith;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
-import static org.junit.Assert.*;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.apache.log4j.Logger;
 import org.dspace.app.util.MockUtil;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.core.ConfigurationManager;
 import org.dspace.core.Context;
 import org.dspace.core.I18nUtil;
 import org.dspace.discovery.MockIndexEventConsumer;
-
+import org.dspace.eperson.EPerson;
+import org.dspace.eperson.Group;
 import org.dspace.servicemanager.DSpaceKernelImpl;
 import org.dspace.servicemanager.DSpaceKernelInit;
-import org.dspace.storage.rdbms.MockDatabaseManager;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-@PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+
+import org.apache.log4j.Logger;
+
 public class ExampleTaskIntegrationTest {
+  protected static DSpaceKernelImpl kernelImpl;
+  protected static Properties testProps;
+  private static final Logger log = Logger.getLogger(ExampleTaskIntegrationTest.class);
+
+  protected Context context;
   private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
   private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
   private final PrintStream originalOut = System.out;
   private final PrintStream originalErr = System.err;
-
-  private static final Logger log = Logger.getLogger(ExampleTaskIntegrationTest.class);
-  protected static Properties testProps;
-  protected Context context;
-  protected static DSpaceKernelImpl kernelImpl;
 
   @BeforeClass
   public static void initOnce()
@@ -80,11 +68,6 @@ public class ExampleTaskIntegrationTest {
       {
         kernelImpl.start(ConfigurationManager.getProperty("dspace.dir"));
       }
-
-      // Applies/initializes our mock database by invoking its constructor
-      // (NOTE: This also initializes the DatabaseManager, which in turn
-      // calls DatabaseUtils to initialize the entire DB via Flyway)
-      //new MockDatabaseManager();
 
       // Initialize mock indexer (which does nothing, since Solr isn't running)
       new MockIndexEventConsumer();
@@ -128,11 +111,9 @@ public class ExampleTaskIntegrationTest {
   @AfterClass
   public static void destroyOnce()
   {
-    //we clear the properties
     testProps.clear();
     testProps = null;
 
-    //Also clear out the kernel & nullify (so JUnit will clean it up)
     if (kernelImpl!=null) {
       kernelImpl.destroy();
     }
@@ -165,7 +146,7 @@ public class ExampleTaskIntegrationTest {
 
     // Set our global test EPerson as the current user in DSpace
     context.setCurrentUser(eperson);
-    //Group.initDefaultGroupNames(context);
+    Group.initDefaultGroupNames(context);
 
     context.restoreAuthSystemState();
     context.commit();
@@ -199,7 +180,7 @@ public class ExampleTaskIntegrationTest {
       fail("Failed to raise an exception");
     } catch (IllegalArgumentException exception) {
       final String exceptionMessage = exception.getMessage();
+      assertEquals("Missing the email argument", exceptionMessage);
     }
   }
-
 }

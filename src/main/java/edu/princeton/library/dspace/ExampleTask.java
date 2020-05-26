@@ -35,7 +35,7 @@ public final class ExampleTask {
 
       context.restoreAuthSystemState();
     } else {
-      throw new IllegalArgumentException("Missing email argument");
+      throw new IllegalArgumentException("Missing the email argument");
     }
   }
 }
