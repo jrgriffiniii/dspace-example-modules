@@ -52,7 +52,7 @@ public class ExampleTaskIntegrationTest {
   private final PrintStream originalOut = System.out;
   private final PrintStream originalErr = System.err;
 
-  private static final Logger log = Logger.getLogger(ExampleTaskTest.class);
+  private static final Logger log = Logger.getLogger(ExampleTaskIntegrationTest.class);
   protected static Properties testProps;
   protected Context context;
   protected static DSpaceKernelImpl kernelImpl;
@@ -67,7 +67,7 @@ public class ExampleTaskIntegrationTest {
 
       //load the properties of the tests
       testProps = new Properties();
-      URL properties = ExampleTaskTest.class.getClassLoader()
+      URL properties = ExampleTaskIntegrationTest.class.getClassLoader()
         .getResource("test-config.properties");
       testProps.load(properties.openStream());
 
@@ -105,10 +105,39 @@ public class ExampleTaskIntegrationTest {
     System.setErr(new PrintStream(errContent));
   }
 
-  @Before
-  public void setUpMocks() throws Exception {
+  /**
+   * This is used to delete the DSpace kernel context after each test
+   */
+  protected void cleanupContext(Context c)
+  {
+    // If context still valid, abort it
+    if(c!=null && c.isValid())
+      c.abort();
 
-    //mockStatic(EPerson.class);
+    // Cleanup Context object by setting it to null
+    if(c!=null)
+      c = null;
+  }
+
+  @After
+  public void destroy()
+  {
+    cleanupContext(context);
+  }
+
+  @AfterClass
+  public static void destroyOnce()
+  {
+    //we clear the properties
+    testProps.clear();
+    testProps = null;
+
+    //Also clear out the kernel & nullify (so JUnit will clean it up)
+    if (kernelImpl!=null) {
+      kernelImpl.destroy();
+    }
+
+    kernelImpl = null;
   }
 
   @After
@@ -117,8 +146,7 @@ public class ExampleTaskIntegrationTest {
     System.setErr(originalErr);
   }
 
-  @Test
-  public void testRun() throws Exception {
+  protected void setUpEPerson() throws SQLException, AuthorizeException {
     final Context context = new Context();
     context.turnOffAuthorisationSystem();
 
@@ -126,14 +154,12 @@ public class ExampleTaskIntegrationTest {
     eperson = EPerson.findByEmail(context, "test@email.com");
     if(eperson == null)
     {
-
       eperson = EPerson.create(context);
       eperson.setFirstName("first");
       eperson.setLastName("last");
       eperson.setEmail("test@email.com");
       eperson.setCanLogIn(true);
       eperson.setLanguage(I18nUtil.getDefaultLocale().getLanguage());
-      // actually save the eperson to unit testing DB
       eperson.update();
     }
 
@@ -141,13 +167,27 @@ public class ExampleTaskIntegrationTest {
     context.setCurrentUser(eperson);
     //Group.initDefaultGroupNames(context);
 
-    //when(EPerson.findByEmail( any(Context.class), anyString() )).thenReturn(null);
-
     context.restoreAuthSystemState();
     context.commit();
+  }
 
-    final String[] taskArgs = new String[] {"-euser@localhost.localdomain"};
+  @Test
+  public void testRun() throws Exception {
+    setUpEPerson();
+    final String[] taskArgs = new String[] {"-etest@email.com"};
     ExampleTask.main(taskArgs);
+
+    final String out = outContent.toString();
+    assertTrue(out.contains("Successfully found the user test@email.com\n"));
+  }
+
+  @Test
+  public void testRunWithInvalidEmail() throws Exception {
+    final String[] taskArgs = new String[] {"-einvalid@localhost.localdomain"};
+    ExampleTask.main(taskArgs);
+
+    final String err = errContent.toString();
+    assertTrue(err.contains("Failed to find the user invalid@localhost.localdomain - is this a valid e-mail address?"));
   }
 
   @Test
@@ -161,36 +201,5 @@ public class ExampleTaskIntegrationTest {
       final String exceptionMessage = exception.getMessage();
     }
   }
-
-protected void cleanupContext(Context c)
-    {
-        // If context still valid, abort it
-        if(c!=null && c.isValid())
-           c.abort();
-
-        // Cleanup Context object by setting it to null
-        if(c!=null)
-           c = null;
-    }
-
-@After
-    public void destroy()
-    {
-        // Cleanup our global context object
-        cleanupContext(context);
-    }
-
-    @AfterClass
-    public static void destroyOnce()
-    {
-        //we clear the properties
-        testProps.clear();
-        testProps = null;
-        
-        //Also clear out the kernel & nullify (so JUnit will clean it up)
-        if (kernelImpl!=null)
-            kernelImpl.destroy();
-        kernelImpl = null;
-    }
 
 }
