@@ -1,40 +1,28 @@
 package edu.princeton.library.dspace;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.IOException;
-import java.net.URL;
-import java.sql.SQLException;
-import java.util.Properties;
-import java.util.TimeZone;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
-
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import org.apache.log4j.Logger;
-
 import org.dspace.core.Context;
 import org.dspace.eperson.EPerson;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-@PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
+@PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*", "javax.crypto.*"})
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(EPerson.class)
 public class ExampleTaskUnitTest {
@@ -65,7 +53,7 @@ public class ExampleTaskUnitTest {
   @Test
   public void testRun() throws Exception {
     EPerson mockEPerson = mock(EPerson.class);
-    when(EPerson.findByEmail( any(Context.class), anyString() )).thenReturn(mockEPerson);
+    when(EPerson.findByEmail(any(Context.class), anyString())).thenReturn(mockEPerson);
 
     final String[] taskArgs = new String[] {"-euser@localhost.localdomain"};
     ExampleTask.main(taskArgs);
@@ -80,7 +68,9 @@ public class ExampleTaskUnitTest {
     ExampleTask.main(taskArgs);
 
     final String err = errContent.toString();
-    assertTrue(err.contains("Failed to find the user invalid@localhost.localdomain - is this a valid e-mail address?"));
+    assertTrue(
+        err.contains(
+            "Failed to find the user invalid@localhost.localdomain - is this a valid e-mail address?"));
   }
 
   @Test
@@ -95,5 +85,4 @@ public class ExampleTaskUnitTest {
       assertEquals("Missing the email argument", exceptionMessage);
     }
   }
-
 }

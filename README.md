@@ -24,6 +24,12 @@ mvn process-test-resources
 mvn buildplan:list
 ```
 
+### Ensuring that Classes comply with the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
+
+```
+mvn com.coveo:fmt-maven-plugin:format
+```
+
 ### Running an integration test:
 ```
 mvn test -Dmaven.test.skip=false -Dtest=ExampleTaskIntegrationTest
@@ -50,6 +56,18 @@ jdb -attach 5005
 ```
 
 Documentation for the jdb can be found on [the Oracle Java 8 documentation](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/jdb.html). There is also support for this in [Vim](https://gitlab.com/Dica-Developer/vim-jdb), [Sublime](https://github.com/jdebug/JDebug), [Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug), and [IntelliJ IDEA](https://www.jetbrains.com/help/idea/debugging-your-first-java-application.html).
+
+### Generate Javadoc documentation:
+
+```
+mvn javadoc:javadoc
+```
+
+### Test Javadoc documentation coverage:
+
+```
+mvn javadoc:test-javadoc
+```
 
 ## Deployment
 

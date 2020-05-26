@@ -1,13 +1,17 @@
 package edu.princeton.library.dspace;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.TimeZone;
-
+import org.apache.log4j.Logger;
 import org.dspace.app.util.MockUtil;
 import org.dspace.authorize.AuthorizeException;
 import org.dspace.core.ConfigurationManager;
@@ -18,21 +22,11 @@ import org.dspace.eperson.EPerson;
 import org.dspace.eperson.Group;
 import org.dspace.servicemanager.DSpaceKernelImpl;
 import org.dspace.servicemanager.DSpaceKernelInit;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-
-import org.apache.log4j.Logger;
 
 public class ExampleTaskIntegrationTest {
   protected static DSpaceKernelImpl kernelImpl;
@@ -46,26 +40,23 @@ public class ExampleTaskIntegrationTest {
   private final PrintStream originalErr = System.err;
 
   @BeforeClass
-  public static void initOnce()
-  {
-    try
-    {
-      //set a standard time zone for the tests
+  public static void initOnce() {
+    try {
+      // set a standard time zone for the tests
       TimeZone.setDefault(TimeZone.getTimeZone("Europe/Dublin"));
 
-      //load the properties of the tests
+      // load the properties of the tests
       testProps = new Properties();
-      URL properties = ExampleTaskIntegrationTest.class.getClassLoader()
-        .getResource("test-config.properties");
+      URL properties =
+          ExampleTaskIntegrationTest.class.getClassLoader().getResource("test-config.properties");
       testProps.load(properties.openStream());
 
-      //load the test configuration file
+      // load the test configuration file
       ConfigurationManager.loadConfig(null);
 
       // Initialise the service manager kernel
       kernelImpl = DSpaceKernelInit.getKernel(null);
-      if (!kernelImpl.isRunning())
-      {
+      if (!kernelImpl.isRunning()) {
         kernelImpl.start(ConfigurationManager.getProperty("dspace.dir"));
       }
 
@@ -74,9 +65,7 @@ public class ExampleTaskIntegrationTest {
 
       // Initialize mock Util class
       new MockUtil();
-    } 
-    catch (IOException ex)
-    {
+    } catch (IOException ex) {
       log.error("Error initializing tests", ex);
       fail("Error initializing tests");
     }
@@ -90,31 +79,28 @@ public class ExampleTaskIntegrationTest {
 
   /**
    * This is used to delete the DSpace kernel context after each test
+   *
+   * @param c the DSpace kernel context
    */
-  protected void cleanupContext(Context c)
-  {
+  protected void cleanupContext(Context c) {
     // If context still valid, abort it
-    if(c!=null && c.isValid())
-      c.abort();
+    if (c != null && c.isValid()) c.abort();
 
     // Cleanup Context object by setting it to null
-    if(c!=null)
-      c = null;
+    if (c != null) c = null;
   }
 
   @After
-  public void destroy()
-  {
+  public void destroy() {
     cleanupContext(context);
   }
 
   @AfterClass
-  public static void destroyOnce()
-  {
+  public static void destroyOnce() {
     testProps.clear();
     testProps = null;
 
-    if (kernelImpl!=null) {
+    if (kernelImpl != null) {
       kernelImpl.destroy();
     }
 
@@ -133,8 +119,7 @@ public class ExampleTaskIntegrationTest {
 
     EPerson eperson = null;
     eperson = EPerson.findByEmail(context, "test@email.com");
-    if(eperson == null)
-    {
+    if (eperson == null) {
       eperson = EPerson.create(context);
       eperson.setFirstName("first");
       eperson.setLastName("last");
@@ -168,7 +153,9 @@ public class ExampleTaskIntegrationTest {
     ExampleTask.main(taskArgs);
 
     final String err = errContent.toString();
-    assertTrue(err.contains("Failed to find the user invalid@localhost.localdomain - is this a valid e-mail address?"));
+    assertTrue(
+        err.contains(
+            "Failed to find the user invalid@localhost.localdomain - is this a valid e-mail address?"));
   }
 
   @Test
