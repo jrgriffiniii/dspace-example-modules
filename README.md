@@ -1,8 +1,8 @@
-# DSpace Example Modules
+# An Modules for DSpace
 
-This is an experiment
+This is an example module for DSpace 5.3, targeting Java 8 releases.
 
-***## Getting started
+## Getting started
 
 ### Run the Docker container for PostgreSQL
 ```
