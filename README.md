@@ -32,9 +32,14 @@ mvn test -Dmaven.test.skip=false -Dtest=ExampleTaskUnitTest
 mvn test -Dmaven.test.skip=false -Dtest=ExampleTaskUnitTest -Dmaven.surefire.debug
 ```
 
-This will open an instance of the `jdb`, which can be connected with the following:
+This should produce the following output:
+```
+Listening for transport dt_socket at address: 5005
+```
+
+Then, in another terminal, please open the `jdb` using the following:
 ```
 jdb -attach 5005
 ```
 
-Documentation for the jdb can be found on [the Oracle Java 8 documentation](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/jdb.html). There is also support for this in [Vim](https://gitlab.com/Dica-Developer/vim-jdb), [Sublime](https://github.com/jdebug/JDebug), [VS Code](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug), and [IntelliJ IDEA](https://www.jetbrains.com/help/idea/debugging-your-first-java-application.html).
+Documentation for the jdb can be found on [the Oracle Java 8 documentation](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/jdb.html). There is also support for this in [Vim](https://gitlab.com/Dica-Developer/vim-jdb), [Sublime](https://github.com/jdebug/JDebug), [Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug), and [IntelliJ IDEA](https://www.jetbrains.com/help/idea/debugging-your-first-java-application.html).
