@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  verify:
+  build:
     working_directory: ~/dspace-example-modules
 
     docker:
@@ -30,7 +30,28 @@ jobs:
       - store_artifacts:
           path: target/site/jacoco
 
+  reporting:
+    working_directory: ~/dspace-example-modules
+
+    docker:
+      - image: circleci/openjdk:8-jdk-stretch
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: circleci-dspace-example-modules-{{ checksum "pom.xml" }}
+      - run: mvn dependency:go-offline
+      - save_cache:
+          paths:
+            - ~/.m2
+            - ~/dspace-example-modules/target
+          key: circleci-dspace-example-modules-{{ checksum "pom.xml" }}
+      - run: mvn site
+      - store_artifacts:
+          path: target/site
+
 workflows:
   maven_test:
     jobs:
-      - verify
+      - build
+      - reporting
