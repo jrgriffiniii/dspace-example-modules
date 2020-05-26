@@ -6,6 +6,10 @@ jobs:
 
     docker:
       - image: circleci/openjdk:8-jdk-stretch
+      - image: postgres:9.0
+        environment:
+          POSTGRES_USER: dspace
+          POSTGRES_PASSWORD: dspace
 
     steps:
       - checkout

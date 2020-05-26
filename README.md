@@ -1,4 +1,5 @@
 # Example Modules for DSpace
+[![CircleCI](https://circleci.com/gh/jrgriffiniii/dspace-example-modules.svg?style=svg)](https://circleci.com/gh/jrgriffiniii/dspace-example-modules)
 
 This are example modules for DSpace 5.3 releases, targeting Java 8.
 
@@ -6,7 +7,7 @@ This are example modules for DSpace 5.3 releases, targeting Java 8.
 
 ### Run the Docker container for PostgreSQL
 ```
-docker run --name dspace-test-postgres -p 55432:5432 -e POSTGRES_USER=dspace -e POSTGRES_PASSWORD=dspace -d postgres:9.0
+docker run --name dspace-test-postgres -p 5432:5432 -e POSTGRES_USER=dspace -e POSTGRES_PASSWORD=dspace -d postgres:9.0
 ```
 
 ### Install the Maven dependencies and build the resources
