@@ -1,0 +1,255 @@
+<?xml version="1.0"?>
+<!--
+  - DSpace Example Modules build file
+  -
+  -->
+<project name="dspace-example-modules" default="help">
+
+    <!-- ============================================================= -->
+    <!-- Description                                                   -->
+    <!-- ============================================================= -->
+
+    <description>
+        ====================== DSpace Example Modules build file ======================
+
+        Common usage:
+
+        Fresh install of DSpace:
+        % ant fresh_install
+
+        Update existing installation, leaving data and configuration intact:
+        % ant -Dconfig=/installdir/config/dspace.cfg update
+
+        ========================================================================
+    </description>
+
+    <!-- DS-1391: Ant 1.8.0+ is required, fail if not available. -->
+    <fail message="Ant 1.8.0+ is required, ${ant.version} is not supported">
+        <condition>
+            <not>
+                <antversion atleast="1.8.0"/>
+            </not>
+        </condition>
+    </fail>
+
+    <!-- ============================================================= -->
+    <!-- Will be using various environment variables                   -->
+    <!-- ============================================================= -->
+
+    <property environment="env" />
+
+
+    <!-- ============================================================= -->
+    <!-- Build parameters that are likely to need tweaking             -->
+    <!-- ============================================================= -->
+
+    <!-- Default overwrite to true. This may be overridden. -->
+    <condition property="overwrite" value="true">
+        <not>
+            <isset property="overwrite"/>
+        </not>
+    </condition>
+
+
+    <!-- Default configuration to use.  This may be overridden. -->
+    <property name="config" value="config/dspace.cfg" />
+
+    <!-- Give user a chance to override without editing this file
+       (and without typing -D each time s/he compiles it) -->
+    <property file="${user.home}/.dspace.properties" />
+
+    <!-- First, set the dspace.dir property so it can be
+       interpolated when loading the config file.
+       This crudely mimics the way ConfigurationManager interpolates properties.
+       Note that it ONLY works for directories that interpolate ${dspace.dir}
+       but that _should_ cover all cases used in this build configuration.
+    -->
+    <loadproperties srcFile="${config}">
+        <filterchain>
+            <linecontainsregexp>
+                <regexp pattern="^\s*dspace\.dir\s+" />
+            </linecontainsregexp>
+        </filterchain>
+    </loadproperties>
+
+    <!-- Load the configuration -->
+    <property file="${config}" />
+
+    <!-- Timestamp date used when creating backup directories -->
+    <tstamp>
+        <format property="build.date" pattern="yyyyMMdd-HHmmss" />
+    </tstamp>
+
+    <!-- ============================================================= -->
+    <!-- Print some useful help text                                  -->
+    <!-- ============================================================= -->
+    <target name="help">
+
+        <echo message="" />
+        <echo message="DSpace Example Modules configuration file" />
+        <echo message="-----------------------------------" />
+        <echo message="" />
+        <echo message="Available targets are:" />
+        <echo message="" />
+        <echo message="update          --> Update ${dspace.dir} config, etc, lib and web applications without " />
+        <echo message="                    touching your data" />
+        <echo message="update_webapps  --> Update web applications" />
+        <echo message="" />
+        <echo message="fresh_install   --> Perform a fresh installation of the software. " />
+        <echo message="" />
+        <echo message="" />
+        <echo message="Available parameters are:" />
+        <echo message="" />
+        <echo message="-Dconfig=&lt;path/to/dspace.cfg&gt;  -- Where your dspace.cfg configuration" />
+        <echo message="                                  is located" />
+        <echo message="-Doverwrite=false              -- Will force update_configs to no longer copy existing"/>
+        <echo message="                                  config to .old files when they conflict with"/>
+        <echo message="                                  the new config.  Instead, new conflicting"/>
+        <echo message="                                  file with be suffixed with .new."/>
+        <echo message="-Dwars=true                    -- Build .war files when updating web" />
+        <echo message="                                  applications" />
+        <echo message="" />
+    </target>
+
+    <!-- ============================================================= -->
+    <!-- Update an installation                                        -->
+    <!-- ============================================================= -->
+
+    <target name="update" depends="update_webapps" description="Update installed code and web applications (without clobbering data/config)">
+    </target>
+
+    <!-- ============================================================= -->
+    <!-- Update Web Applications only                                  -->
+    <!-- ============================================================= -->
+
+    <target name="update_webapps" description="Update Web Applications (without clobbering data/config)">
+
+        <move todir="${dspace.dir}/webapps.bak-${build.date}" failonerror="no">
+            <fileset dir="${dspace.dir}/webapps">
+                <include name="**/*" />
+            </fileset>
+        </move>
+
+        <echo>
+            ====================================================================
+            ${dspace.dir}/webapps was backed up to
+
+            ${dspace.dir}/webapps.bak-${build.date}
+
+            Please review this directory and delete it if it's no longer needed.
+            ====================================================================
+        </echo>
+
+        <antcall target="copy_webapps" />
+
+        <echo>
+            ====================================================================
+            Updated DSpace Web application directories are in the
+            '${dspace.dir}/webapps' directory.
+
+            * Stop your Web servlet container (Tomcat, Jetty, Resin etc.)
+
+            * If your Web servlet container already loads the DSpace
+            UI web applications from ${dspace.dir}/webapps/, then you
+            can jump straight to restarting your Web servlet container
+
+            * Otherwise, you will need to copy any web applications from
+            ${dspace.dir}/webapps/ to the appropriate place for your servlet
+            container.  (e.g. '$CATALINA_HOME/webapps' for Tomcat)
+
+            If you're using Tomcat, you should first delete any existing
+            DSpace directories in '$CATALINA_HOME/webapps/' (e.g. you would
+            delete an existing $CATALINA_HOME/webapps/dspace/ directory).
+            Otherwise, Tomcat may continue to use old code in that directory.
+
+            * Start up your Web servlet container again.
+            ====================================================================
+        </echo>
+
+    </target>
+
+
+    <!-- ============================================================= -->
+    <!-- Copy Web Applications to Runtime Location -->
+    <!-- ============================================================= -->
+
+    <target name="copy_webapps">
+
+        <!-- Copy webapp files to /webapps (excluding any filtered files) -->
+        <copy todir="${dspace.dir}/webapps/dspace-example-modules" preservelastmodified="true" failonerror="no">
+            <fileset dir="target/dspace-example-modules-5.3">
+                <exclude name="**/web.xml" />
+                <exclude name="**/robots.txt" />
+            </fileset>
+        </copy>
+
+        <!-- Ensure specific webapp files (web.xml, robots.txt) are filtered -->
+        <copy todir="${dspace.dir}/webapps/dspace-example-modules" preservelastmodified="false" failonerror="no">
+            <fileset dir="target/dspace-example-modules-5.3">
+                <include name="**/web.xml" />
+                <include name="**/robots.txt" />
+            </fileset>
+            <filterchain>
+                <expandproperties />
+            </filterchain>
+        </copy>
+
+        <antcall target="build_webapps_wars"/>
+
+    </target>
+
+
+    <!-- ============================================================= -->
+    <!-- Compress Web Applications                                     -->
+    <!-- (Only executes if the "wars" property is defined)             -->
+    <!-- ============================================================= -->
+
+    <target name="build_webapps_wars" description="Compress Web Applications into .war files" if="wars">
+
+        <war destfile="${dspace.dir}/webapps/dspace-example-modules.war">
+            <fileset dir="${dspace.dir}/webapps/dspace-example-modules/" />
+        </war>
+    </target>
+
+    <!-- ============================================================= -->
+    <!-- Do a fresh system install                                     -->
+    <!-- ============================================================= -->
+
+    <target name="fresh_install"
+            description="Do a fresh install of the system, overwriting any data">
+
+        <delete failonerror="no">
+            <fileset dir="${dspace.dir}/webapps/dspace-example-modules" includes="**/*" />
+        </delete>
+
+        <antcall target="copy_webapps" />
+
+        <echo>
+            ====================================================================
+            The DSpace example modules code have been installed.
+
+            To complete installation, you should do the following:
+
+            * Setup your Web servlet container (e.g. Tomcat) to look for your
+            DSpace web applications in: ${dspace.dir}/webapps/
+
+            OR, copy any web applications from ${dspace.dir}/webapps/ to
+            the appropriate place for your servlet container.
+            (e.g. '$CATALINA_HOME/webapps' for Tomcat)
+
+            * Start up your servlet container (e.g. Tomcat). DSpace now will
+            initialize the database on the first startup.
+
+            * Make an initial administrator account (an e-person) in DSpace:
+
+            ${dspace.dir}/bin/dspace create-administrator
+
+            You should then be able to access your DSpace's 'home page':
+
+            ${dspace.url}
+
+            ====================================================================
+        </echo>
+
+    </target>
+</project>
