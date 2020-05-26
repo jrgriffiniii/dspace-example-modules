@@ -8,16 +8,13 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.dspace.core.Context;
-import org.dspace.core.I18nUtil;
-import org.dspace.eperson.EPerson;
-import org.dspace.eperson.Group;
-
+import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
-import static org.junit.Assert.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,75 +28,20 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.apache.log4j.Logger;
-import org.dspace.app.util.MockUtil;
-import org.dspace.authorize.AuthorizeException;
-import org.dspace.core.ConfigurationManager;
+
 import org.dspace.core.Context;
-import org.dspace.core.I18nUtil;
-import org.dspace.discovery.MockIndexEventConsumer;
-
-import org.dspace.servicemanager.DSpaceKernelImpl;
-import org.dspace.servicemanager.DSpaceKernelInit;
-import org.dspace.storage.rdbms.MockDatabaseManager;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.dspace.eperson.EPerson;
 
 @PowerMockIgnore({"org.apache.http.conn.ssl.*", "javax.net.ssl.*" , "javax.crypto.*"})
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(EPerson.class)
 public class ExampleTaskUnitTest {
+  private static final Logger log = Logger.getLogger(ExampleTaskUnitTest.class);
+
   private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
   private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
   private final PrintStream originalOut = System.out;
   private final PrintStream originalErr = System.err;
-
-  private static final Logger log = Logger.getLogger(ExampleTaskTest.class);
-  protected static Properties testProps;
-  protected Context context;
-  protected static DSpaceKernelImpl kernelImpl;
-
-  @BeforeClass
-  public static void initOnce()
-  {
-    try
-    {
-      //set a standard time zone for the tests
-      TimeZone.setDefault(TimeZone.getTimeZone("Europe/Dublin"));
-
-      //load the properties of the tests
-      testProps = new Properties();
-      URL properties = ExampleTaskTest.class.getClassLoader()
-        .getResource("test-config.properties");
-      testProps.load(properties.openStream());
-
-      //load the test configuration file
-      ConfigurationManager.loadConfig(null);
-
-      // Initialise the service manager kernel
-      kernelImpl = DSpaceKernelInit.getKernel(null);
-      if (!kernelImpl.isRunning())
-      {
-        kernelImpl.start(ConfigurationManager.getProperty("dspace.dir"));
-      }
-
-      // Applies/initializes our mock database by invoking its constructor
-      // (NOTE: This also initializes the DatabaseManager, which in turn
-      // calls DatabaseUtils to initialize the entire DB via Flyway)
-      //new MockDatabaseManager();
-
-      // Initialize mock indexer (which does nothing, since Solr isn't running)
-      new MockIndexEventConsumer();
-
-      // Initialize mock Util class
-      new MockUtil();
-    } 
-    catch (IOException ex)
-    {
-      log.error("Error initializing tests", ex);
-      fail("Error initializing tests");
-    }
-  }
 
   @Before
   public void setUpStreams() {
@@ -120,42 +62,23 @@ public class ExampleTaskUnitTest {
 
   @Test
   public void testRun() throws Exception {
-    /*
-    final Context context = new Context();
-    context.turnOffAuthorisationSystem();
-    */
-
     EPerson mockEPerson = mock(EPerson.class);
     when(EPerson.findByEmail( any(Context.class), anyString() )).thenReturn(mockEPerson);
 
-    /*
-    eperson = EPerson.findByEmail(context, "test@email.com");
-    if(eperson == null)
-    {
-
-      eperson = EPerson.create(context);
-      eperson.setFirstName("first");
-      eperson.setLastName("last");
-      eperson.setEmail("test@email.com");
-      eperson.setCanLogIn(true);
-      eperson.setLanguage(I18nUtil.getDefaultLocale().getLanguage());
-      // actually save the eperson to unit testing DB
-      eperson.update();
-    }
-
-
-    // Set our global test EPerson as the current user in DSpace
-    context.setCurrentUser(eperson);
-    //Group.initDefaultGroupNames(context);
-
-    //when(EPerson.findByEmail( any(Context.class), anyString() )).thenReturn(null);
-
-    context.restoreAuthSystemState();
-    context.commit();
-    */
-
     final String[] taskArgs = new String[] {"-euser@localhost.localdomain"};
     ExampleTask.main(taskArgs);
+
+    final String out = outContent.toString();
+    assertTrue(out.contains("Successfully found the user user@localhost.localdomain\n"));
+  }
+
+  @Test
+  public void testRunWithInvalidEmail() throws Exception {
+    final String[] taskArgs = new String[] {"-einvalid@localhost.localdomain"};
+    ExampleTask.main(taskArgs);
+
+    final String err = errContent.toString();
+    assertTrue(err.contains("Failed to find the user invalid@localhost.localdomain - is this a valid e-mail address?"));
   }
 
   @Test
@@ -169,36 +92,5 @@ public class ExampleTaskUnitTest {
       final String exceptionMessage = exception.getMessage();
     }
   }
-
-protected void cleanupContext(Context c)
-    {
-        // If context still valid, abort it
-        if(c!=null && c.isValid())
-           c.abort();
-
-        // Cleanup Context object by setting it to null
-        if(c!=null)
-           c = null;
-    }
-
-@After
-    public void destroy()
-    {
-        // Cleanup our global context object
-        cleanupContext(context);
-    }
-
-    @AfterClass
-    public static void destroyOnce()
-    {
-        //we clear the properties
-        testProps.clear();
-        testProps = null;
-        
-        //Also clear out the kernel & nullify (so JUnit will clean it up)
-        if (kernelImpl!=null)
-            kernelImpl.destroy();
-        kernelImpl = null;
-    }
 
 }
