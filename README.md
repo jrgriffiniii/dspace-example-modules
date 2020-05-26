@@ -63,3 +63,9 @@ mvn war:war
 mvn war:exploded
 ant -Dconfig=/dspace/config/dspace.cfg fresh_install
 ```
+
+## Running the Example CLI Task:
+
+```
+bash scripts/dsrun.sh -etest@localhost.localdomain
+```
